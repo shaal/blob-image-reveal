@@ -15,7 +15,7 @@
   --blob-morph-speed: 7s;    /* Duration of shape morphing animation */
   --blob-rotate-speed: 53s;  /* Duration of rotation (prime numbers avoid sync) */
   --blob-blur: 30;           /* Edge blur amount (0=sharp, 30+=very soft) */
-  --blob-smoothing: 0.08;    /* Movement easing (0.01=very slow, 0.5=fast, 1=instant) */
+  --blob-smoothing: 0.04;    /* Movement easing (0.01=very slow, 0.5=fast, 1=instant) */
 }
 
 /* ===========================================
