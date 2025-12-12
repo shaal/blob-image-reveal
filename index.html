@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blob Mask Image Reveal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Hover to Reveal</h1>
+    <p class="subtitle">Move your mouse over the image to reveal what's hidden beneath</p>
+
+    <div class="image-container" id="imageContainer">
+      <!-- Base image (visible by default) -->
+      <img
+        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop"
+        alt="Mountain landscape"
+        class="base-image"
+      >
+
+      <!-- Reveal image (shown through blob mask) -->
+      <div class="reveal-layer">
+        <img
+          src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop"
+          alt="Beach paradise"
+          class="reveal-image"
+        >
+      </div>
+
+      <!-- SVG for the animated blob mask with blur -->
+      <svg class="blob-svg" viewBox="0 0 800 600" preserveAspectRatio="none">
+        <defs>
+          <!-- Gaussian blur filter for soft edges -->
+          <filter id="blobBlur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
+          </filter>
+
+          <!-- Mask using the blurred blob shape -->
+          <mask id="blobMask">
+            <rect width="100%" height="100%" fill="black" />
+            <path id="blobPath" d="M 0 0" fill="white" filter="url(#blobBlur)" />
+          </mask>
+        </defs>
+      </svg>
+
+      <!-- Cursor hint -->
+      <div class="cursor-hint" id="cursorHint">
+        <span>👆</span>
+      </div>
+    </div>
+
+    <p class="credit">Images from Unsplash</p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
