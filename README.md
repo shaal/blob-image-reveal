@@ -1,23 +1,16 @@
 # Blob Image Reveal
 
-An interactive image reveal effect using an animated, organic blob shape that follows your cursor. Built with vanilla HTML, CSS, and JavaScript — no dependencies.
-
-![Demo](https://raw.githubusercontent.com/shaal/blob-image-reveal/main/demo.gif)
+An interactive image reveal effect using an animated SVG blob mask that follows your cursor. Built with vanilla HTML, CSS, and JavaScript — no dependencies.
 
 ## Features
 
-- **Animated blob mask** — Organic, wobbly shape that continuously morphs
-- **Smooth cursor tracking** — Configurable easing for natural movement
-- **Soft feathered edges** — SVG Gaussian blur creates dreamy transitions
-- **Fully responsive** — Works at any screen size
-- **Mobile support** — Touch events for phones and tablets
-- **Performance optimized** — Pauses when tab is hidden, debounced resize
-- **Zero dependencies** — Pure vanilla JS, ~230 lines of code
-- **Customizable** — Easy configuration via options object
-
-## Demo
-
-[Live Demo](https://shaal.github.io/blob-image-reveal/)
+- **Animated blob mask** — Organic shape that morphs and rotates continuously
+- **Cursor tracking** — Blob follows mouse position to reveal underlying image
+- **Soft feathered edges** — SVG Gaussian blur creates smooth transitions
+- **CSS Custom Properties** — Easy configuration via CSS variables
+- **Fixed pixel sizing** — Blob size stays constant regardless of container size
+- **Fully responsive** — Image scales while blob maintains its pixel dimensions
+- **Zero dependencies** — Pure vanilla HTML, CSS, and JS
 
 ## Quick Start
 
@@ -33,111 +26,121 @@ An interactive image reveal effect using an animated, organic blob shape that fo
    # Then visit http://localhost:8080
    ```
 
-## Usage
+## Configuration
 
-### Basic Setup
+All blob settings are controlled via CSS custom properties in `styles.css`:
 
-Include the HTML structure:
-
-```html
-<div class="image-container" id="imageContainer">
-  <!-- Base image (visible by default) -->
-  <img src="your-base-image.jpg" alt="Base" class="base-image">
-
-  <!-- Reveal image (shown through blob mask) -->
-  <div class="reveal-layer">
-    <img src="your-reveal-image.jpg" alt="Reveal" class="reveal-image">
-  </div>
-
-  <!-- SVG blob mask -->
-  <svg class="blob-svg" viewBox="0 0 800 600" preserveAspectRatio="none">
-    <defs>
-      <filter id="blobBlur" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
-      </filter>
-      <mask id="blobMask">
-        <rect width="100%" height="100%" fill="black" />
-        <path id="blobPath" d="M 0 0" fill="white" filter="url(#blobBlur)" />
-      </mask>
-    </defs>
-  </svg>
-</div>
-```
-
-Initialize the blob mask:
-
-```html
-<script src="script.js"></script>
+```css
+:root {
+  /* Blob controls */
+  --blob-size: 250px;        /* Diameter in pixels (fixed, not relative) */
+  --blob-morph-speed: 7s;    /* Shape morphing animation duration */
+  --blob-rotate-speed: 53s;  /* Rotation animation duration */
+  --blob-blur: 30;           /* Edge softness (0 = sharp, 30+ = very soft) */
+  --blob-smoothing: 0.08;    /* Movement easing (0.01 = slow, 1 = instant) */
+}
 ```
 
 ### Configuration Options
 
-Customize the blob behavior by passing options:
-
-```javascript
-const blobMask = new BlobMask('imageContainer', {
-  blobRadius: 60,      // Size of the blob (default: 60)
-  numPoints: 8,        // Number of points defining the blob shape (default: 8)
-  wobbleAmount: 15,    // Intensity of the wobble animation (default: 15)
-  wobbleSpeed: 0.0015, // Speed of the wobble animation (default: 0.0015)
-  easing: 0.08,        // Cursor follow smoothness, 1 = instant (default: 0.08)
-});
-```
-
-### Customizing the Blur
-
-Adjust the blur amount in the HTML by changing `stdDeviation`:
-
-```html
-<!-- Sharper edges -->
-<feGaussianBlur in="SourceGraphic" stdDeviation="10" />
-
-<!-- Softer, dreamier edges -->
-<feGaussianBlur in="SourceGraphic" stdDeviation="40" />
-```
-
-### API
-
-```javascript
-// Access the instance
-const blob = window.blobMask;
-
-// Clean up (removes all event listeners)
-blob.destroy();
-
-// Reinitialize with new options
-window.blobMask = new BlobMask('imageContainer', { blobRadius: 100 });
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--blob-size` | `250px` | Blob diameter in pixels. Stays fixed regardless of image size. |
+| `--blob-morph-speed` | `7s` | How fast the blob shape morphs between states. |
+| `--blob-rotate-speed` | `53s` | How fast the blob rotates (use prime numbers to avoid repetition). |
+| `--blob-blur` | `30` | Edge blur amount. Higher = softer, dreamier edges. |
+| `--blob-smoothing` | `0.08` | Cursor follow easing. Lower = floaty, higher = snappy, 1 = instant. |
 
 ## How It Works
 
-1. **SVG Mask** — The reveal image is masked using an SVG `<mask>` element with a blurred path
-2. **Dynamic Path** — JavaScript generates a smooth blob shape using Catmull-Rom to Bézier curve conversion
-3. **Organic Animation** — Multiple overlapping sine waves create natural, non-repeating wobble
-4. **Responsive ViewBox** — The SVG viewBox dynamically matches the container's pixel dimensions
+### Structure
+
+```text
+image-container
+├── base-image        (always visible)
+└── blob-svg          (SVG overlay with masked reveal image)
+    ├── mask
+    │   └── blob-position    (JS controls translation)
+    │       └── blob-scale   (JS controls size compensation)
+    │           └── blob-rotation  (CSS animation)
+    │               └── blob-path  (CSS morphing animation)
+    └── image         (revealed through mask)
+```
+
+### Key Concepts
+
+1. **SVG Mask** — The reveal image is masked by an SVG `<mask>` element. White areas in the mask are visible, black areas are hidden.
+
+2. **Nested Groups** — Each transform (position, scale, rotation) is on a separate `<g>` element to avoid CSS transform conflicts.
+
+3. **Fixed Pixel Sizing** — JavaScript calculates a compensation scale factor so the blob stays at the exact pixel size you specify, even when the container resizes:
+   ```javascript
+   scale = (desiredPixels / BASE_BLOB_SIZE) * (VIEWBOX_WIDTH / containerWidth)
+   ```
+
+4. **Smooth Movement** — The blob uses linear interpolation (lerping) to ease toward the cursor position, creating fluid motion:
+   ```javascript
+   position.current = lerp(position.current, position.target, smoothing)
+   ```
+
+5. **CSS Animations** — The blob shape morphs using CSS `d: path()` animation, while rotation uses a standard `transform: rotate()` animation.
+
+## File Structure
+
+```text
+svg-mask/
+├── index.html    # HTML structure with SVG mask
+├── styles.css    # Styles and CSS custom properties
+├── script.js     # Mouse tracking and variable application
+└── README.md     # This file
+```
 
 ## Browser Support
 
-- Chrome 88+
-- Firefox 78+
-- Safari 14+
-- Edge 88+
+- Chrome 89+
+- Firefox 97+
+- Safari 15.4+
+- Edge 89+
 
 Requires support for:
-- CSS `mask` / `-webkit-mask`
-- SVG filters
-- ResizeObserver
-- ES6 classes
+- CSS `d: path()` animation
+- CSS custom properties
+- SVG masks and filters
+
+## Customization
+
+### Using Different Images
+
+Update the image sources in `index.html`:
+
+```html
+<!-- Base image (always visible) -->
+<img src="your-base-image.jpg" class="base-image">
+
+<!-- Reveal image (inside SVG) -->
+<image href="your-reveal-image.jpg" ... />
+```
+
+### Creating Custom Blob Shapes
+
+The blob path is defined in the `@keyframes blob` animation in `styles.css`. Generate new blob paths using tools like [Blobmaker](https://www.blobmaker.app/) or [Haikei](https://haikei.app/).
+
+### Adjusting Container Size
+
+Modify the `.image-container` in `styles.css`:
+
+```css
+.image-container {
+  width: 800px;       /* Change max width */
+  max-width: 90vw;    /* Responsive constraint */
+  aspect-ratio: 4/3;  /* Change aspect ratio */
+}
+```
 
 ## License
 
-[MIT](LICENSE) — feel free to use in personal and commercial projects.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+MIT — feel free to use in personal and commercial projects.
 
 ## Credits
 
 - Demo images from [Unsplash](https://unsplash.com)
-- Inspired by creative mask effects in modern web design
