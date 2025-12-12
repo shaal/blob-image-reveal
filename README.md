@@ -78,7 +78,12 @@ image-container
    scale = (desiredPixels / BASE_BLOB_SIZE) * (VIEWBOX_WIDTH / containerWidth)
    ```
 
-4. **CSS Animations** — The blob shape morphs using CSS `d: path()` animation, while rotation uses a standard `transform: rotate()` animation.
+4. **Smooth Movement** — The blob uses linear interpolation (lerping) to ease toward the cursor position, creating fluid motion:
+   ```javascript
+   position.current = lerp(position.current, position.target, smoothing)
+   ```
+
+5. **CSS Animations** — The blob shape morphs using CSS `d: path()` animation, while rotation uses a standard `transform: rotate()` animation.
 
 ## File Structure
 
