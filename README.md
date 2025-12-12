@@ -55,7 +55,7 @@ All blob settings are controlled via CSS custom properties in `styles.css`:
 
 ### Structure
 
-```
+```text
 image-container
 ├── base-image        (always visible)
 └── blob-svg          (SVG overlay with masked reveal image)
@@ -87,7 +87,7 @@ image-container
 
 ## File Structure
 
-```
+```text
 svg-mask/
 ├── index.html    # HTML structure with SVG mask
 ├── styles.css    # Styles and CSS custom properties

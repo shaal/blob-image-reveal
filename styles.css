@@ -59,9 +59,17 @@ body {
   pointer-events: none;
 }
 
+/* Scale group - JS applies transform here */
+.blob-scale {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 /* Rotation animation applied to inner group */
 .blob-rotation {
   animation: rot var(--blob-rotate-speed) linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 /* Shape morphing animation */
